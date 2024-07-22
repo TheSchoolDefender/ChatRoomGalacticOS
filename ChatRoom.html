@@ -1,0 +1,334 @@
+<html>
+
+<head>
+  <title>Galactic OS Chat Room</title>
+  <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gun/lib/webrtc.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      margin: 0;
+      padding: 20px;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    #chat-container {
+      width: 100%;
+      max-width: 600px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(156, 61, 232, 0.3);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    #chat-messages {
+      height: 400px;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      max-width: 80%;
+    }
+
+    .message.self {
+      align-self: flex-end;
+      background-color: #9c3de8;
+      color: white;
+    }
+
+    .message.other {
+      align-self: flex-start;
+      background-color: rgba(255, 255, 255, 0.2);
+      color: #e0e0e0;
+    }
+
+    .message.system {
+      align-self: center;
+      background-color: rgba(255, 165, 0, 0.2);
+      color: #ffa500;
+      font-style: italic;
+    }
+
+    .message.warning {
+      align-self: center;
+      background-color: rgba(255, 0, 0, 0.2);
+      color: #ff6b6b;
+      font-weight: bold;
+    }
+
+    .user-id {
+      font-size: 0.8em;
+      color: #aaa;
+      margin-left: 5px;
+    }
+
+    #chat-form {
+      display: flex;
+      padding: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #message-input {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #9c3de8;
+      border-radius: 5px;
+      margin-right: 10px;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #e0e0e0;
+    }
+
+    #message-input::placeholder {
+      color: rgba(224, 224, 224, 0.6);
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #9c3de8;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #8a2be2;
+    }
+
+    button:disabled {
+      background-color: #666;
+      cursor: not-allowed;
+    }
+
+    h1 {
+      color: #9c3de8;
+      text-shadow: 0 0 10px rgba(156, 61, 232, 0.5);
+    }
+
+    #admin-panel {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 5px;
+    }
+
+    /* Scrollbar styles */
+    #chat-messages::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #chat-messages::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    #chat-messages::-webkit-scrollbar-thumb {
+      background-color: #9c3de8;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Galactic OS CHAT ROOM</h1>
+  <div id="chat-container">
+    <div id="chat-messages"></div>
+    <form id="chat-form" method="GET" action="send-message">
+      <input type="text" id="message-input" name="message" placeholder="Type your message..." required>
+      <button type="submit" id="send-button">Send</button>
+    </form>
+  </div>
+  <div id="admin-panel" style="display: none;">
+    <h3>Admin Panel</h3>
+    <p>You are now an admin. Use the following commands:</p>
+    <ul>
+      <li>/mute [userID]</li>
+      <li>/unmute [userID]</li>
+      <li>/ban [userID]</li>
+      <li>/sudo [userID] [text]</li>
+    </ul>
+  </div>
+
+  <script>
+    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
+    let user;
+    let isAdmin = false;
+    const ADMIN_PASSCODE = "GalacticOSMod69420";
+
+    function promptForName() {
+      const name = prompt("Please enter your name:");
+      if (name) {
+        user = {name: name, id: Math.random().toString(36).substring(7)};
+        localStorage.setItem('chatUser', JSON.stringify(user));
+      } else {
+        promptForName();
+      }
+    }
+    const storedUser = localStorage.getItem('chatUser');
+    if (storedUser) {
+      user = JSON.parse(storedUser);
+    } else {
+      promptForName();
+    }
+
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const adminPanel = document.getElementById('admin-panel');
+
+    const messageIds = new Set();
+    const mutedUsers = new Set();
+    const bannedUsers = new Set();
+    if (localStorage.getItem('banned') === 'true') {
+      document.body.innerHTML = '<h1>You have been banned from this chat.</h1>';
+      throw new Error('User is banned');
+    }
+
+    gun.get('chat').map().on(function (message, id) {
+      if (message && message.timestamp > Date.now() - 1000 * 60 * 60) { 
+        if (!messageIds.has(id)) {
+          messageIds.add(id);
+          if (!bannedUsers.has(message.userId)) {
+            addMessageToDOM(message);
+          }
+        }
+      }
+    });
+
+    chatForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const message = messageInput.value.trim();
+      if (message) {
+        if (message === ADMIN_PASSCODE) {
+          isAdmin = true;
+          adminPanel.style.display = 'block';
+          addSystemMessage("Admin Enabled", true);
+        } else if (isAdmin && message.startsWith('/')) {
+          handleAdminCommand(message);
+        } else {
+          const newMessage = {
+            sender: user.name,
+            userId: user.id,
+            content: message,
+            timestamp: Date.now()
+          };
+          gun.get('chat').set(newMessage);
+        }
+        messageInput.value = '';
+      }
+    });
+
+    function addMessageToDOM(message) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message');
+      messageElement.classList.add(message.userId === user.id ? 'self' : 'other');
+      const userIdSpan = isAdmin ? `<span class="user-id">(ID: ${message.userId})</span>` : '';
+      messageElement.innerHTML = `${message.sender}${userIdSpan}: ${message.content}`;
+      chatMessages.appendChild(messageElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addSystemMessage(content, isPrivate = false) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', 'system');
+      messageElement.textContent = content;
+      if (isPrivate) {
+        messageElement.style.color = '#00ff00';
+        messageElement.textContent += ' (Only visible to you)';
+      }
+      chatMessages.appendChild(messageElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addWarningMessage(content) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', 'warning');
+      messageElement.textContent = content;
+      chatMessages.appendChild(messageElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function handleAdminCommand(command) {
+      const parts = command.split(' ');
+      const action = parts[0].toLowerCase();
+      const targetId = parts[1];
+
+      switch (action) {
+        case '/mute':
+          mutedUsers.add(targetId);
+          gun.get('mutedUsers').set({[targetId]: true});
+          addSystemMessage(`User with ID ${targetId} has been muted.`);
+          break;
+        case '/unmute':
+          mutedUsers.delete(targetId);
+          gun.get('mutedUsers').set({[targetId]: false});
+          addSystemMessage(`User with ID ${targetId} has been unmuted.`);
+          break;
+        case '/ban':
+          bannedUsers.add(targetId);
+          addSystemMessage(`User with ID ${targetId} has been banned.`);
+          gun.get('bannedUsers').set({[targetId]: true});
+          break;
+        case '/sudo':
+          const sudoMessage = parts.slice(2).join(' ');
+          const newMessage = {
+            sender: `[ADMIN as ${targetId}]`,
+            userId: targetId,
+            content: sudoMessage,
+            timestamp: Date.now()
+          };
+          gun.get('chat').set(newMessage);
+          addSystemMessage(`Message sent as ${targetId}: ${sudoMessage}`, true);
+          break;
+        default:
+          addSystemMessage("Unknown command.");
+      }
+    }
+
+    gun.get('bannedUsers').once((data) => {
+      if (data && data[user.id]) {
+        localStorage.setItem('banned', 'true');
+        document.body.innerHTML = '<h1>You have been banned from this chat.</h1>';
+        throw new Error('User is banned');
+      }
+    });
+
+    gun.get('mutedUsers').on((data) => {
+      if (data && data[user.id]) {
+        if (!mutedUsers.has(user.id)) {
+          mutedUsers.add(user.id);
+          addWarningMessage("You have been muted. You can still type messages, but they won't be sent.");
+        }
+      } else {
+        if (mutedUsers.has(user.id)) {
+          mutedUsers.delete(user.id);
+          addWarningMessage("You have been unmuted. You can now send messages again.");
+        }
+      }
+    });
+
+    const originalSend = Gun.prototype.set;
+    Gun.prototype.set = function (data) {
+      if (data && data.sender === user.name && mutedUsers.has(user.id)) {
+        addWarningMessage("You are muted. Your message was not sent.");
+        return;
+      }
+      originalSend.apply(this, arguments);
+    };
+
+  </script>
+</body>
+
+</html>
