@@ -1,351 +1,334 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-  <title>Galactic OS</title>
-  <link rel="stylesheet" href="https://galactic-os-on-scratch.vercel.app/style.css">
-  <link rel="icon" type="image/x-icon" href="https://galactic-os-on-scratch.vercel.app/assets/Logo of GALACTIC OS.svg">
+  <title>Galactic OS Chat Room</title>
+  <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gun/lib/webrtc.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      margin: 0;
+      padding: 20px;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    #chat-container {
+      width: 100%;
+      max-width: 600px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(156, 61, 232, 0.3);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    #chat-messages {
+      height: 400px;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      max-width: 80%;
+    }
+
+    .message.self {
+      align-self: flex-end;
+      background-color: #9c3de8;
+      color: white;
+    }
+
+    .message.other {
+      align-self: flex-start;
+      background-color: rgba(255, 255, 255, 0.2);
+      color: #e0e0e0;
+    }
+
+    .message.system {
+      align-self: center;
+      background-color: rgba(255, 165, 0, 0.2);
+      color: #ffa500;
+      font-style: italic;
+    }
+
+    .message.warning {
+      align-self: center;
+      background-color: rgba(255, 0, 0, 0.2);
+      color: #ff6b6b;
+      font-weight: bold;
+    }
+
+    .user-id {
+      font-size: 0.8em;
+      color: #aaa;
+      margin-left: 5px;
+    }
+
+    #chat-form {
+      display: flex;
+      padding: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #message-input {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #9c3de8;
+      border-radius: 5px;
+      margin-right: 10px;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #e0e0e0;
+    }
+
+    #message-input::placeholder {
+      color: rgba(224, 224, 224, 0.6);
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #9c3de8;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #8a2be2;
+    }
+
+    button:disabled {
+      background-color: #666;
+      cursor: not-allowed;
+    }
+
+    h1 {
+      color: #9c3de8;
+      text-shadow: 0 0 10px rgba(156, 61, 232, 0.5);
+    }
+
+    #admin-panel {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 5px;
+    }
+
+    /* Scrollbar styles */
+    #chat-messages::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #chat-messages::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    #chat-messages::-webkit-scrollbar-thumb {
+      background-color: #9c3de8;
+      border-radius: 4px;
+    }
+  </style>
 </head>
-  
+
 <body>
-  <header>
-    <nav>
-        <div class="navbar">
-            <a href="#home" onclick="showPage('home')">Home</a>
-            <a href="#use" onclick="showPage('use')">Use</a>
-            <a href="#news" onclick="showPage('news')">News</a>
-            <a href="#about-us" onclick="showPage('about-us')">About Us</a>
-            <a href="#faq" onclick="showPage('faq')">FAQ</a>
-            <a href="#contact-us" onclick="showPage('contact-us')">Contact Us</a>
-            <a href="#credits" onclick="showPage('credits')">Credits</a>
-        </div>
-    </nav>
-
-  </header>
-
-  <div class="container">
-    <div id="home" class="page active">
-      <section class="hero">
-        <img src="https://galactic-os-on-scratch.vercel.app/assets/Logo of GALACTIC OS.svg" alt="Galactic OS logo featuring a stylized arrow in a purple circular design" width="300" height="300">
-        <h1>Welcome to Galactic OS</h1>
-        <p>A very Advanced Operating System with The Most Talented and gifted Dev's we know</p>
-      </section>
-
-      <section class="features">
-        <div class="feature">
-          <h3>The beginning of the Operating System</h3>
-          <p>Valeo24 proposed the idea of collaboration between ScreamingQQ originally. ScreamingQQ agreed to take on the job and then they started the large and taxing project. Currently right now the OS is being developed. Version 1.0 alpha is currently out in the GalacticTeamStudio. </p>
-        </div>
-        <div class="feature">
-          <h3>Is Galactic OS affiliated with OS Wars?</h3>
-          <p>Sadly we are not affiliated with OS Wars. We might join in the battle OS Wars in the future but we were too late to start in OS Wars X.  If we have any supporters for us entering in OS Wars XI, then we will consider the opportunity, but for now we are currently building up the ultimate team.</p>
-        </div>
-      </section>
-    </div>
-
-    <div id="use" class="page">
-      <h1>What is Galactic OS?</h1>
-      <p>Galactic OS is a software on Scratch created by the GalacticTeam. This OS has capabilities that no other OS on Scratch has ever had before. Some of these features include a VPN, a security system, a webbrowser, netflix, and even more. If you want to see more features coming to Galactic OS, please support us by Following our admins and also like and favorite this project on scratch.</p>
-      <div class="embed">
-        <center><iframe src="https://scratch.mit.edu/projects/1040183221/embed" allowtransparency="true" width="485" height="402" frameborder="0" scrolling="no" allowfullscreen></iframe></center>
-      </div>
-      <br>
-      <center><button onclick="window.location.href='https://drive.google.com/uc?export=download&id=17HBGenm9PIidyfKYeR9M8hEJq2fMMr_g'">Download HTML VERSION</button></center>
-      <br>
-      <div class="feature">
-        <h2>Step 1</h2>
-        <p>Click the download button :D</p>
-      </div>
-      <div class="feature">
-        <h2>Step 2</h2>
-        <p>Once its in your folder click on it</p>
-      </div>
-      <div class="feature">
-        <h2>Step 3</h2>
-        <p>Open in your search engine and see the magic happen</p>
-      </div>
-    </div>
-    <div id="news" class="page">
-      <h1>Galactic OS Website becomes great</h1>
-      <p>On July 21 2024, TheAnythingShop cooked up an amazing website launched an html website that for now, is not offical, but it will become one :D</p>
-      <h2>Some Added Benefits</h2>
-      <ul>
-        <li>Has cool Loading Screen</li>
-        <li>Contains more features</li>
-        <li>Looks More Offical</li>
-      </ul>
-      <h1>Galactic OS Website Launch</h1>
-      <p>On July 12, 2024, ScreamingQQ, a highly respected manager, launched the official website for Galactic OS. This website serves as a one-stop resource for the Galactic OS community, offering essential information, updates, and tools.</p>
-
-      <h2>FAQ Section</h2>
-      <ul>
-          <li>Addresses common questions and concerns about Galactic OS.</li>
-          <li>Helps users troubleshoot issues, learn about new features, and optimize their operating system experience.</li>
-          <li>Covers topics from installation and setup to customization and security.</li>
-      </ul>
-
-      <h2>Contact Us Page</h2>
-      <ul>
-          <li>Provides a direct line of communication for users needing assistance or wishing to reach out to the Galactic OS team.</li>
-      </ul>
-
-      <h2>Community Building</h2>
-      <ul>
-          <li>The website is a significant step in building a strong user community.</li>
-          <li>Includes a section for users to sign up to join the Galactic OS team.</li>
-          <li>Signups are open until July 16, 2024.</li>
-      </ul>
-
-      <h2>Joining the Galactic OS Team</h2>
-      <ul>
-          <li>Opportunity for individuals passionate about technology to make a difference.</li>
-          <li>Team members work with a diverse group of professionals, collaborate on projects, and shape the future of Galactic OS.</li>
-          <li>Looking for individuals with various skills, from programming and software development to marketing and community management.</li>
-      </ul>
-
-      <h2>Website Launch Significance</h2>
-      <ul>
-          <li>A significant milestone for Galactic OS and its community.</li>
-          <li>The website offers comprehensive resources, a user-friendly design, and a commitment to community building.</li>
-          <li>Poised to become a vital hub for Galactic OS users worldwide.</li>
-      </ul>
-
-      <h2>Conclusion</h2>
-      <p>The launch is an exciting development for Galactic OS and its community. The website is a vital resource with essential information, tools, and support. Don't miss your chance to join the Galactic OS team – sign up now before it's too late!</p>
-    </div>
-
-    <div id="about-us" class="page">
-      <h1>What is Galactic OS?
-</h1>
-      <p>Galactic OS is an innovative and exciting new operating system that has been developed on the Scratch platform at Scratch.mit.edu. This groundbreaking OS is designed to provide users with a unique and engaging experience, combining elements of gaming, education, and creativity in a single, user-friendly package.
-<br><br>
-        One of the key features of Galactic OS is its stunning graphical user interface (GUI). The GUI has been designed with a sleek, modern aesthetic that is both visually appealing and intuitive to use. The home screen displays a range of colorful icons, each representing a different application or feature of the OS. These icons are neatly organized into categories, making it easy for users to find what they are looking for.
-        <br><br>
-        Another major strength of Galactic OS is its extensive library of built-in applications. These apps cover a wide range of categories, including games, educational tools, multimedia software, and productivity tools. Whether you're looking to play your favorite games, learn a new skill, or get work done, Galactic OS has you covered.
-        <br><br>
-        One of the most popular categories of apps on Galactic OS is the gaming section. Here, users will find a wide variety of games to choose from, ranging from simple puzzle games to more complex action and adventure titles. Many of these games have been developed using Scratch, which means that they are fully customizable and can be modified by users to create their own unique versions.
-        <br><br>
-        Another category of apps that is sure to be popular with users is the educational section. This section includes a range of tools and resources designed to help users learn new skills and expand their knowledge. For example, there are apps that teach users how to code, how to create art and music, and how to solve math and science problems. These apps are fun, engaging, and highly interactive, making learning a breeze.
-        <br><br>
-        In addition to its built-in apps, Galactic OS also supports third-party apps. This means that users can download and install apps created by other Scratch users, further expanding the capabilities of the OS. This opens up a whole new world of possibilities, as users can access a wide range of apps that have been developed by a diverse community of creators.
-        <br><br>
-        Another key feature of Galactic OS is its robust security system. The OS includes a range of measures to protect users from viruses, malware, and other online threats. For example, all apps are scanned for viruses before they are added to the app library, and users are prompted to install updates and security patches as soon as they become available.
-        <br><br>
-        Galactic OS also includes a range of tools and features designed to help users stay organized and productive. For example, the OS includes a calendar app, which allows users to schedule appointments, set reminders, and keep track of important dates. There is also a task manager app, which allows users to create to-do lists, set priorities, and track their progress.
-        <br><br>
-        In addition to its productivity tools, Galactic OS also includes a range of multimedia software. For example, there is a music player app, which allows users to listen to their favorite songs and create playlists. There is also a video player app, which supports a wide range of video formats, including MP4, AVI, and WMV.
-        <br><br>
-        Another major strength of Galactic OS is its support for online collaboration. The OS includes a range of tools and features designed to help users work together on projects, no matter where they are in the world. For example, there is a chat app, which allows users to send messages in real-time. 
-        <br><br>
-        Galactic OS is also highly customizable, allowing users to tailor the OS to their own preferences and needs. For example, users can change the wallpaper and theme of the OS, as well as the layout and arrangement of the icons on the home screen. Users can also create their own apps and add them to the app library, further expanding the capabilities of the OS.
-        <br><br>
-        Another key feature of Galactic OS is its support for offline use. The OS includes a range of apps and tools that can be used even when an internet connection is not available. For example, there are games that can be played offline, as well as educational tools and productivity apps. This makes Galactic OS a great choice for users who need to be able to work and play on the go, without always having access to an internet connection.
-        <br><br>
-        In addition to its many features and capabilities, Galactic OS is also highly accessible. The OS has been designed with a wide range of users in mind, including those with disabilities. For example, the OS includes a range of accessibility features, such as text-to-speech functionality, keyboard shortcuts, and support for assistive technologies.
-        <br><br>
-        Another major strength of Galactic OS is its strong community of users. The Scratch platform, where the OS was developed, is home to a large and active community of creators and innovators. This community is a great resource for users of Galactic OS, as they can access a wealth of knowledge, advice, and support from other members.
-        <br><br>
-        One of the most exciting aspects of Galactic OS is its potential for future development. The Scratch platform is constantly evolving, and new features and capabilities are being added all the time. This means that users of Galactic OS can look forward to a steady stream of updates and improvements in the future.
-        <br><br>
-        In conclusion, Galactic OS is a powerful and versatile operating system that offers users a unique and engaging experience. With its stunning graphical user interface, extensive library of built-in apps, robust security system, and support for third-party apps, Galactic OS is a great choice for users who want a high-quality, feature-rich operating system that is both fun and functional.</p>
-    </div>
-
-    <div id="faq" class="page">
-      <h1>Frequently Asked Questions</h1>
-      <h2>How can I support Galactic OS without being in the GT(Galactic Team)?</h2>
-      <p>Don't worry. You don't need to be in the Galactic Team to help support us. One of the best ways for you to help support us is by viewing, liking, and favoriting our content. Also you can follow Valeo24 and ScreamingQQ to stay updated with our current versions. Also you can follow the GalacticOS working studio. On top of that, you can advertise our content and also share these projects with people you know.</p>
-      <br><br>
-      <h2>Will Galactic OS shutdown?</h2>
-      <p>No, project Galactic OS will not shut down. Even if plenty of members quit or have other things to do, ScreamingQQ and Valeo24 will make sure to continue the project.</p>
-      <br><br>
-      <h2>What does it take to become a member?</h2>
-      <p>Joining the Galactic OS team is an opportunity for those who possess the necessary skills and a strong work ethic. We're looking for motivated individuals who are eager to take on new challenges and push their boundaries.
-        <br><br>
-      To become a member of our team, you should have a solid foundation in your respective field, whether it be software development, project management, graphic design, or marketing. We value individuals who are self-driven, proactive, and willing to learn and adapt to new technologies and approaches.
-        <br><br>
-      In addition to your technical skills, we're looking for team players who are reliable, communicative, and respectful of others. Our team works collaboratively, and we value each member's input and contributions.
-        <br><br>
-      As a Galactic OS team member, you can expect to be given tasks that match your skill level and the role you applied for. We believe in fairness and equal opportunities for all team members, and we strive to provide a supportive and inclusive work environment.
-        <br><br>
-      Joining our team also means taking on projects that may be outside of your comfort zone or area of expertise. We encourage our team members to explore new areas and develop new skills, as this helps us to grow and innovate as a team.
-        <br><br>
-      In summary, if you're a skilled professional with a strong work ethic and a willingness to learn and grow, we encourage you to apply to join the Galactic OS team. We're looking for team players who are passionate about what they do and committed to contributing to our collective success.</p>
-      <br><br>
-      <h2>What projects should I make?</h2>
-      <p>If you are in the Galactic team, it is suggested you make Login pages, Games, Animations, Apps, Art, Intros, or Menus. Also to get your projects accepted, it is suggested you use a style similar to screamingQQ’s.</p>
-      <br><br>
-    </div>
-
-    <div id="contact-us" class="page">
-      <h2>Contact Us</h2>
-      <p>You can contact us inside the scratch projects :D</p>
-      <p>https://scratch.mit.edu/studios/35304863/</p>
-      <center><iframe src="https://galactic-os-chat-room.vercel.app/" width="1140" height="800"></iframe></center>
-      <br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-    </div>
-
-    <div id="credits" class="page">
-      <h1>Thank you everyone...</h1>
-      <p>Acknowledgments and thanks to all who contributed to the development of Galactic OS.</p>
-      <br><br>
-      <p>Special thanks to <a href="https://scratch.mit.edu/users/ScreamingQQ">ScreamingQQ</a> for directing everyone.
-      <br>
-      Another Special thanks to <a href="https://scratch.mit.edu/users/Valeo24">Valeo24</a> for starting GalacticOS.
-      <br>
-      Thank you <a href="https://scratch.mit.edu/users/Googlearn">Googlearn</a>  for being a foundation to this project.</p>
-      <div class="profile-container">
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/AaronBurr1800" target="_blank">
-              <img src="https://uploads.scratch.mit.edu/get_image/user/112015582_90x90.png?v=" alt="AaronBurr1800" class="profile-pic">
-          </a>
-          <p class="username">AaronBurr1800</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/-planetcode-" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/139084594_90x90.png?v=" alt="-planetcode-" class="profile-pic">
-          </a>
-          <p class="username">-planetcode-</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/BobTheSkeleton212" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/105308503_90x90.png?v=" alt="BobTheSkeleton212" class="profile-pic">
-          </a>
-          <p class="username">BobTheSkeleton212</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/AARAVISGOOD21" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/127929003_90x90.png?v=" alt="AARAVISGOOD21" class="profile-pic">
-          </a>
-          <p class="username">AARAVISGOOD21</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/oXo23" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/117318597_90x90.png?v=" alt="oXo23" class="profile-pic">
-          </a>
-          <p class="username">oXo23</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/ScrachUser29" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/62148874_90x90.png?v=" alt="ScrachUser29" class="profile-pic">
-          </a>
-          <p class="username">ScrachUser29</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/samkov" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/23024346_90x90.png?v=" alt="samkov" class="profile-pic">
-          </a>
-          <p class="username">samkov</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/TheAnythingShop" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/134116235_90x90.png?v=" alt="TheAnythingShop" class="profile-pic">
-          </a>
-          <p class="username">TheAnythingShop</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/Teresady" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/116048108_90x90.png?v=" alt="Teresady" class="profile-pic">
-          </a>
-          <p class="username">Teresady</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/_Zebra_24_" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/116257723_90x90.png?v=" alt="_Zebra_24_" class="profile-pic">
-          </a>
-          <p class="username">_Zebra_24_</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/Bluestacks5lover" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/91438821_90x90.png?v=" alt="Bluestacks5lover" class="profile-pic">
-          </a>
-          <p class="username">Bluestacks5lover</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/zyr0e" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/127628175_90x90.png?v=" alt="zyr0e" class="profile-pic">
-          </a>
-          <p class="username">zyr0e</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/raziqyh12" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/114438244_90x90.png?v=" alt="raziqyh12" class="profile-pic">
-          </a>
-          <p class="username">raziqyh12</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/StarSubject" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/131691551_90x90.png?v=" alt="StarSubject" class="profile-pic">
-          </a>
-          <p class="username">StarSubject</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/YamaskProjects" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/134560179_90x90.png?v=" alt="YamaskProjects" class="profile-pic">
-          </a>
-          <p class="username">YamaskProjects</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/simbad435" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/108138464_90x90.png?v=" alt="simbad435" class="profile-pic">
-          </a>
-          <p class="username">simbad435</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/KWC2013" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/126833372_90x90.png?v=" alt="KWC2013" class="profile-pic">
-          </a>
-          <p class="username">KWC2013</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/Yamigamix" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/129878688_90x90.png?v=" alt="Yamigamix" class="profile-pic">
-          </a>
-          <p class="username">Yamigamix</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/KittyElectronicsInc" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/116330804_90x90.png?v=" alt="KittyElectronicsInc" class="profile-pic">
-          </a>
-          <p class="username">KittyElectronicsInc</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/seanpsean208" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/67996147_90x90.png?v=" alt="seanpsean208" class="profile-pic">
-          </a>
-          <p class="username">seanpsean208</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/AaravisALT" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/139495591_90x90.png?v=" alt="AaravisALT" class="profile-pic">
-          </a>
-          <p class="username">AaravisALT</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/sussywellgames" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/133678530_90x90.png?v=" alt="sussywellgames" class="profile-pic">
-          </a>
-          <p class="username">sussywellgames</p>
-        </div>
-        <div class="profile">
-          <a href="https://scratch.mit.edu/users/-GoBoRo-" target="_blank">
-              <img src="https://cdn2.scratch.mit.edu/get_image/user/114899411_90x90.png?v=" alt="-GoBoRo-" class="profile-pic">
-          </a>
-          <p class="username">-GoBoRo-</p>
-        </div>
-      </div>
-    </div>
+  <h1>Galactic OS CHAT ROOM</h1>
+  <div id="chat-container">
+    <div id="chat-messages"></div>
+    <form id="chat-form" method="GET" action="send-message">
+      <input type="text" id="message-input" name="message" placeholder="Type your message..." required>
+      <button type="submit" id="send-button">Send</button>
+    </form>
+  </div>
+  <div id="admin-panel" style="display: none;">
+    <h3>Admin Panel</h3>
+    <p>You are now an admin. Use the following commands:</p>
+    <ul>
+      <li>/mute [userID]</li>
+      <li>/unmute [userID]</li>
+      <li>/ban [userID]</li>
+      <li>/sudo [userID] [text]</li>
+    </ul>
   </div>
 
-  <footer>
-    <p>&copy; GalacticOS 2024 | Expanding the horizons of computing</p>
-  </footer>
+  <script>
+    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
+    let user;
+    let isAdmin = false;
+    const ADMIN_PASSCODE = "GalacticOSMod69420";
 
-  <div class="loading-overlay">
-    <div class="loading-content">
-      <img src="https://galactic-os-on-scratch.vercel.app/assets/UFO.png" alt="A futuristic spaceship preparing for launch" width="200" height="150">
-      <p>Preparing the section...</p>
-    </div>
-  </div>
+    function promptForName() {
+      const name = prompt("Please enter your name:");
+      if (name) {
+        user = {name: name, id: Math.random().toString(36).substring(7)};
+        localStorage.setItem('chatUser', JSON.stringify(user));
+      } else {
+        promptForName();
+      }
+    }
+    const storedUser = localStorage.getItem('chatUser');
+    if (storedUser) {
+      user = JSON.parse(storedUser);
+    } else {
+      promptForName();
+    }
 
-  <script src="https://galactic-os-on-scratch.vercel.app/script.js"></script>
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const adminPanel = document.getElementById('admin-panel');
+
+    const messageIds = new Set();
+    const mutedUsers = new Set();
+    const bannedUsers = new Set();
+    if (localStorage.getItem('banned') === 'true') {
+      document.body.innerHTML = '<h1>You have been banned from this chat.</h1>';
+      throw new Error('User is banned');
+    }
+
+    gun.get('chat').map().on(function (message, id) {
+      if (message && message.timestamp > Date.now() - 1000 * 60 * 60) { 
+        if (!messageIds.has(id)) {
+          messageIds.add(id);
+          if (!bannedUsers.has(message.userId)) {
+            addMessageToDOM(message);
+          }
+        }
+      }
+    });
+
+    chatForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const message = messageInput.value.trim();
+      if (message) {
+        if (message === ADMIN_PASSCODE) {
+          isAdmin = true;
+          adminPanel.style.display = 'block';
+          addSystemMessage("Admin Enabled", true);
+        } else if (isAdmin && message.startsWith('/')) {
+          handleAdminCommand(message);
+        } else {
+          const newMessage = {
+            sender: user.name,
+            userId: user.id,
+            content: message,
+            timestamp: Date.now()
+          };
+          gun.get('chat').set(newMessage);
+        }
+        messageInput.value = '';
+      }
+    });
+
+    function addMessageToDOM(message) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message');
+      messageElement.classList.add(message.userId === user.id ? 'self' : 'other');
+      const userIdSpan = isAdmin ? `<span class="user-id">(ID: ${message.userId})</span>` : '';
+      messageElement.innerHTML = `${message.sender}${userIdSpan}: ${message.content}`;
+      chatMessages.appendChild(messageElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addSystemMessage(content, isPrivate = false) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', 'system');
+      messageElement.textContent = content;
+      if (isPrivate) {
+        messageElement.style.color = '#00ff00';
+        messageElement.textContent += ' (Only visible to you)';
+      }
+      chatMessages.appendChild(messageElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function addWarningMessage(content) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', 'warning');
+      messageElement.textContent = content;
+      chatMessages.appendChild(messageElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function handleAdminCommand(command) {
+      const parts = command.split(' ');
+      const action = parts[0].toLowerCase();
+      const targetId = parts[1];
+
+      switch (action) {
+        case '/mute':
+          mutedUsers.add(targetId);
+          gun.get('mutedUsers').set({[targetId]: true});
+          addSystemMessage(`User with ID ${targetId} has been muted.`);
+          break;
+        case '/unmute':
+          mutedUsers.delete(targetId);
+          gun.get('mutedUsers').set({[targetId]: false});
+          addSystemMessage(`User with ID ${targetId} has been unmuted.`);
+          break;
+        case '/ban':
+          bannedUsers.add(targetId);
+          addSystemMessage(`User with ID ${targetId} has been banned.`);
+          gun.get('bannedUsers').set({[targetId]: true});
+          break;
+        case '/sudo':
+          const sudoMessage = parts.slice(2).join(' ');
+          const newMessage = {
+            sender: `[ADMIN as ${targetId}]`,
+            userId: targetId,
+            content: sudoMessage,
+            timestamp: Date.now()
+          };
+          gun.get('chat').set(newMessage);
+          addSystemMessage(`Message sent as ${targetId}: ${sudoMessage}`, true);
+          break;
+        default:
+          addSystemMessage("Unknown command.");
+      }
+    }
+
+    gun.get('bannedUsers').once((data) => {
+      if (data && data[user.id]) {
+        localStorage.setItem('banned', 'true');
+        document.body.innerHTML = '<h1>You have been banned from this chat.</h1>';
+        throw new Error('User is banned');
+      }
+    });
+
+    gun.get('mutedUsers').on((data) => {
+      if (data && data[user.id]) {
+        if (!mutedUsers.has(user.id)) {
+          mutedUsers.add(user.id);
+          addWarningMessage("You have been muted. You can still type messages, but they won't be sent.");
+        }
+      } else {
+        if (mutedUsers.has(user.id)) {
+          mutedUsers.delete(user.id);
+          addWarningMessage("You have been unmuted. You can now send messages again.");
+        }
+      }
+    });
+
+    const originalSend = Gun.prototype.set;
+    Gun.prototype.set = function (data) {
+      if (data && data.sender === user.name && mutedUsers.has(user.id)) {
+        addWarningMessage("You are muted. Your message was not sent.");
+        return;
+      }
+      originalSend.apply(this, arguments);
+    };
+
+  </script>
 </body>
+
 </html>
